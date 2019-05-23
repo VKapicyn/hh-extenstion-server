@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block commonStyles %}
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    
+    {% endblock %}
+    <title></title>
+</head>
+<body>
+<div class="row">
+    <div class="col-lg-8 col-md-8 col-sm-12 col-12">
+        <form action="/reg" method="POST">
+            <h3>Регистрация</h3>
+            <input id="login" name="login" class="form-control" type="text" placeholder="Логин">
+            <br>
+            <input id="pass" name="pass" class="form-control" type="password" placeholder="Пароль">
+            <br>
+            <input id="pass1" name="pass1" class="form-control" type="password" placeholder="Повторите пароль">
+            <br>
+            <button type="input" class="btn btn-success btn-xs">Зарегистрироваться</button>
+        </form>
+
+    </div>
+</div>
+</body>
+</html>

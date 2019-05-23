@@ -1,0 +1,31 @@
+{
+  "name": "demo_partiya_rosta",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "dependencies": {
+    "async-request": "^1.2.0",
+    "body-parser": "^1.18.3",
+    "connect-nedb-session": "0.0.3",
+    "cookie-parser": "^1.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
+    "express-session": "^1.15.6",
+    "fs": "0.0.1-security",
+    "md5": "^2.2.1",
+    "nedb": "^1.8.0",
+    "nedb-session-store": "^1.1.2",
+    "nodemon": "^1.18.5",
+    "nunjucks": "^3.1.6"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VKapicyn/..."
+  },
+  "author": "Time2Chain",
+  "license": "ISC"
+}
