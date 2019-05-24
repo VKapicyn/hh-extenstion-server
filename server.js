@@ -50,7 +50,7 @@ function randomInteger(min, max) {
     var rand = min - 0.5 + Math.random() * (max - min + 1)
     rand = Math.round(rand);
     return rand;
-  }
+}
 
 //// routing
 
@@ -164,13 +164,27 @@ router.get('/newuser/:company/:author', (req, res) => {
     })
 })
 
-router.get('/info', (req, res) => {
-    res.json({
-        status: 1,
-        text: 'Вышло обновление расширение HH Pietet.\nДля корректной работы, обновите расширение по ссылке http://hh.ru'
-    })
+router.get('/info/:version', (req, res) => {
+    if (req.params.version == config.version) {
+        res.json({
+            status: 0,
+            text: 'У вас последняя версия расширения'
+        })
+    } else {
+        res.json({
+            status: 1,
+            text: 'Вышло обновление расширение HH Pietet.\nДля корректной работы, обновите расширение по ссылке http://hrhonor.ru'
+        })
+    }
 })
 
 app.use(router);
 app.listen(require('./config.js').port);
+
+let server = require('https').createServer({
+    key: fs.readFileSync(path.resolve(__dirname, 'ssl/server.key')),
+    cert: fs.readFileSync(path.resolve(__dirname, 'ssl/server.crt'))
+}, app);
+server.listen(require('./config.js').port2);
+
 console.log(`Running at Port ${config.port}`);
