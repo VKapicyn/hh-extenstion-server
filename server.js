@@ -165,7 +165,12 @@ router.get('/newuser/:company/:author', (req, res) => {
 })
 
 router.get('/info/:version', (req, res) => {
-    if (req.params.version == config.version) {
+    if (req.params.version==='0' || req.params.version === 0) {
+        res.json({
+            status: 0,
+            version: config.version
+        })
+    } else if (req.params.version == config.version) {
         res.json({
             status: 0,
             text: 'У вас последняя версия расширения'
@@ -173,7 +178,7 @@ router.get('/info/:version', (req, res) => {
     } else {
         res.json({
             status: 1,
-            text: 'Вышло обновление расширение HH Pietet.\nДля корректной работы, обновите расширение по ссылке http://hrhonor.ru'
+            text: 'Вышло обновление расширение HH Pietet.\nДля корректной работы, обновите расширение по ссылке http://hrhonor.ru/upd'
         })
     }
 })
@@ -181,10 +186,10 @@ router.get('/info/:version', (req, res) => {
 app.use(router);
 app.listen(require('./config.js').port);
 
-let server = require('https').createServer({
+/*let server = require('https').createServer({
     key: fs.readFileSync(path.resolve(__dirname, 'ssl/server.key')),
     cert: fs.readFileSync(path.resolve(__dirname, 'ssl/server.crt'))
 }, app);
-server.listen(require('./config.js').port2);
+server.listen(require('./config.js').port2);*/
 
 console.log(`Running at Port ${config.port}`);
