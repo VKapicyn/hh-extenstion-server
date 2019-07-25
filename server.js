@@ -219,6 +219,8 @@ router.get('/comm/:id', async (req, res) => {
                 });
             }
             res.render('comment.html', {resumeId: acc[0].userId, api: config.url ,comments});
+        } else {
+            res.render('comment.html', {resumeId: 0, api: config.url ,comments:[]})
         }
     });
 })

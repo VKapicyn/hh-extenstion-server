@@ -10,10 +10,15 @@
 <body>
 <div class="row">
     <div class="col-lg-6 col-md-6 col-sm-12 col-12">
+        
         <h2>Отзывы о резюме пользователя: id {{resumeId}}</h2>
-        {% for item in comments %}
-            <p><b>{{item.cause}}</b> ({{item.date}}) - "{{item.text}}", от пользователя <a target="_blank" href="{{api}}/user/{{item.id}}">id{{item.id}}</a></p>
-        {% endfor %}
+        {% if comments.length != 0 %}
+            {% for item in comments %}
+                <p><b>{{item.cause}}</b> ({{item.date}}) - "{{item.text}}", от пользователя <a target="_blank" href="{{api}}/user/{{item.id}}">id{{item.id}}</a></p>
+            {% endfor %}
+        {% else %}
+            <p><b>Отзывы отсутствуют</b></p>
+        {% endif %}
     </div>
 </div>
 </body>
