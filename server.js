@@ -290,6 +290,37 @@ router.get('/info/:version', (req, res) => {
     }
 })
 
+router.get('/user/:id', async (req, res) => {
+    let results = [];
+    userDB.find({}, (err, users) => {
+        for (let i=0; i<users.lengh; i++) {
+            for (let j=0; j<users[i].estimating.lengh; j++) {
+                if (users[i].estimating[j].pietetId === req.params.id) {
+                    results.push({
+                        date: users[i].estimating[j].date.toLocaleString("ru-RU", {day: 'numeric', month: 'numeric', year:'numeric'}),
+                        cause: (() => {
+                            let answer = '';
+                            switch(users[i].estimating[j].choice) {
+                                case '1': answer = 'Не пришел на интервью'; break;
+                                case '3': answer = 'Неадекватное поведение'; break;
+                                case '4': answer = 'Другое'; break;
+                            }
+                            return answer;
+                        })(),
+                        text: (users[i].estimating[j].comment === '') ? 'Без комментариев' : users[i].estimating[j].comment,
+                        id: users[i].estimating[j].id,
+                    });
+                }
+            }
+            res.render('users.html', {resumeId: req.params.id, api: config.url ,results:[]})
+        }
+    });
+})
+
+router.get('/info', (req, res) =>  {
+    res.render(`info.html`)
+});
+
 app.use(router);
 app.listen(require('./config.js').port);
 
