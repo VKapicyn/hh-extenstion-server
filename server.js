@@ -93,24 +93,27 @@ router.post('/dopreg', async (req, res) => {
             if (author[0].pietetPass.toString() === req.body.passId.toString() &&
             !author[0].email && !author[0].pass
             ) {
-                authorDB.find({email: req.body.email}, async (err, _author) => {
-                    if (_author.length === 0) {
-                        errCode = 0;
-                        await authorDB.update({pietetId: author[0].pietetId},{
-                            pietetId: author[0].pietetId,
-                            pietetPass: author[0].pietetPass,
-                            company: author[0].company,
-                            company2: req.body.company,
-                            position: req.body.position,
-                            author: author[0].author,
-                            email: req.body.email,
-                            pass: req.body.pass,
-                        }, {})
-                    }
-                    {
-                        errCode = 1;
-                        errText = 'Такой email уже зарегистрирован';
-                    }
+                await new Promise((rsp,rj) => {
+                    authorDB.find({email: req.body.email}, async (err, _author) => {
+                        if (_author.length === 0) {
+                            errCode = 0;
+                            await authorDB.update({pietetId: author[0].pietetId},{
+                                pietetId: author[0].pietetId,
+                                pietetPass: author[0].pietetPass,
+                                company: author[0].company,
+                                company2: req.body.company,
+                                position: req.body.position,
+                                author: author[0].author,
+                                email: req.body.email,
+                                pass: req.body.pass,
+                            }, {})
+                        }
+                        {
+                            errCode = 1;
+                            errText = 'Такой email уже зарегистрирован';
+                        }
+                        rsp();
+                    });
                 })
  
             }
