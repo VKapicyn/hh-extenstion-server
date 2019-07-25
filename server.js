@@ -109,6 +109,8 @@ router.post('/dopreg', async (req, res) => {
                             }, {})
                         }
                         {
+                            console.log('vo')
+                            console.log(_author)
                             errCode = 1;
                             errText = 'Такой email уже зарегистрирован';
                         }
