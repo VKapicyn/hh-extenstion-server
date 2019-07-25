@@ -59,7 +59,6 @@ router.get('/reg', async (req, res) => {
 })
 router.post('/reg', async (req, res) => {
     userDB.find({login: req.body.login}, async (err, test) => {
-        console.log(test)
         if (req.body.login && (req.body.pass == req.body.pass1) && test.length==0) {
             await userDB.insert({
                 login: req.body.login,
@@ -68,7 +67,6 @@ router.post('/reg', async (req, res) => {
                 ops: []
             })
             userDB.find({login: req.body.login} , (err2, accaunt) => {
-                console.log(accaunt)
                 accaunt = accaunt[0]
                 req.session.user = {id: accaunt._id, login: accaunt.login, session: req.sessionID}
                 req.session.save();
@@ -80,33 +78,98 @@ router.post('/reg', async (req, res) => {
     })
 })
 
-router.post('/comment', async (req, res) => {
-    //TODO: проверить право на отправку по id
-    //TODO: сохранять инфу о получателе
-    console.log(req.body.acc)
-    console.log(req.body.id+'POST')
-    authorDB.find({pietetId: req.body.acc.pietetId}, async (err, author) => {
+router.post('/dopreg', async (req, res) => {
+    let errCode = 1;
+    let errText = '';
+    let emailValid = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
+    if (req.body.pass.length < 6 || !emailValid.test(req.body.email) || !req.body.company || !req.body.position) {
+        res.json({errCode:1, errText: 'Некорректно заполнены поля'});
+    } else
+    authorDB.find({pietetId: Number(req.body.id)}, async (err, author) => {
         if (author[0]) {
-            if (author[0].pietetPass == req.body.acc.pietetPass) {
-                await userDB.find({userId: req.body.id}, async (err, acc) => {
+            console.log(author[0])
+            console.log(req.body)
+            console.log(!author[0].email, !author[0].pass, !author[0].email && !author[0].pass)
+            if (author[0].pietetPass.toString() === req.body.passId.toString() &&
+            !author[0].email && !author[0].pass
+            ) {
+                authorDB.find({email: req.body.email}, async (err, _author) => {
+                    if (_author.length === 0) {
+                        errCode = 0;
+                        await authorDB.update({pietetId: author[0].pietetId},{
+                            pietetId: author[0].pietetId,
+                            pietetPass: author[0].pietetPass,
+                            company: author[0].company,
+                            company2: req.body.company,
+                            position: req.body.position,
+                            author: author[0].author,
+                            email: req.body.email,
+                            pass: req.body.pass,
+                        }, {})
+                    }
+                    {
+                        errCode = 1;
+                        errText = 'Такой email уже зарегистрирован';
+                    }
+                })
+ 
+            }
+            else if (author[0].email || author[0].pass) {
+                errCode = 1;
+                errText = 'Вы уже зарегистрированы';
+            }
+        }
+        res.json({errCode, errText});
+    });
+});
+
+router.post('/auth', async (req, res) => {
+    let errCode = 1;
+    let errText = '';
+    authorDB.find({email: req.body.email}, async (err, author) => {
+        if (author[0]) {
+            if (author[0].pass.toString() === req.body.pass.toString()) {
+                res.json({id: author[0].pietetId, pass: author[0].pietetPass, errCode: 0});
+            }
+            else
+                res.json({errCode, errText: 'Неверный пароль!'})
+        }
+        else
+            res.json({errCode, errText: 'Пользователь не найден!'})
+    });
+});
+
+router.post('/comment', async (req, res) => {
+    let errCode = 1;
+    let errText = '';
+    authorDB.find({pietetId: Number(req.body.acc.pietetId)}, async (err, author) => {
+        if (author[0]) {
+            if (author[0].pietetPass.toString() === req.body.acc.pietetPass.toString() &&
+                author[0].email && author[0].pass
+                ) {
+                await new Promise((resp, rej) => {
+                    userDB.find({userId: req.body.id}, async (err, acc) => {
                     if (acc[0]){
                         let flag = false
                         acc[0].estimating.map(estimate => {
-                            if (estimate == req.body.acc.pietetId) {
+                            if (estimate.id == req.body.acc.pietetId) {
                                 flag = true;
                             }
                         })
-        
+
                         new_count = acc[0].count;
                         if (!flag) {
                             ++new_count;
-                            acc[0].estimating.push(req.body.acc.pietetId);
+                            acc[0].estimating.push({date: new Date(), id: req.body.acc.pietetId, choice: req.body.choice, comment: req.body.comment});
                         }
                         else {
                             --new_count;
-                            acc[0].estimating.splice(acc[0].estimating.indexOf(req.body.acc.pietetId), 1)
+                            acc[0].estimating.splice(acc[0].estimating.findIndex(item=> {
+                                return item.id === req.body.acc.pietetId
+                            }), 1)
                         }
         
+                        errCode = 0;
                         await userDB.update({userId: acc[0].userId},{
                             userId: acc[0].userId,
                             count: new_count,
@@ -114,28 +177,58 @@ router.post('/comment', async (req, res) => {
                         }, {})
                     }
                     else {
+                        errCode = 0;
                         await userDB.insert({
                             userId: req.body.id,
                             count: 1,
-                            estimating: [req.body.acc.pietetId]
+                            estimating: [{id: req.body.acc.pietetId, choice: req.body.choice, comment: req.body.comment, date: new Date()}]
                         })
                     }
+                    resp();
+                    });
                 })        
             }
+            else {
+                errText = 'Для отправки отзыва необходимо авторизоваться.';
+            }
+        } else {
+            errText = 'Для отправки отзыва необходимо зарегистрироваться в расширении.';
         }
-        res.send('ok')
+        res.json({errCode, errText})
     })
 })
 
+router.get('/comm/:id', async (req, res) => {
+    userDB.find({userId: req.params.id}, (err, acc) => {
+        if (acc[0]) {
+            let comments = [];
+            for (let i=0; i<acc[0].estimating.length; i++) {
+                comments.push({
+                    date: acc[0].estimating[i].date.toLocaleString("ru-RU", {day: 'numeric', month: 'numeric', year:'numeric'}),
+                    cause: (() => {
+                        let answer = '';
+                        switch(acc[0].estimating[i].choice) {
+                            case '1': answer = 'Не пришел на интервью'; break;
+                            case '3': answer = 'Неадекватное поведение'; break;
+                            case '4': answer = 'Другое'; break;
+                        }
+                        return answer;
+                    })(),
+                    text: (acc[0].estimating[i].comment === '') ? 'Без комментариев' : acc[0].estimating[i].comment,
+                    id: acc[0].estimating[i].id,
+                });
+            }
+            res.render('comment.html', {resumeId: acc[0].userId, api: config.url ,comments});
+        }
+    });
+})
+
 router.get('/comment', async (req, res) => {
-    console.log(req.query.id+' GET')
-    console.log(req.query.fio)
-    //TODO: получение инфы, "лайкал" ли этот юзер соискателя
     userDB.find({userId: req.query.id}, (err, acc) => {
         if (acc[0]) {
             let flag = false;
             acc[0].estimating.map( value => {
-                if (value == req.query.author)
+                if (value.id == req.query.author)
                     flag = true;
             })
             res.json({count: acc[0].count, liked: flag})
@@ -147,7 +240,7 @@ router.get('/comment', async (req, res) => {
 })
 
 router.get('/newuser/:company/:author', (req, res) => {
-    //TODO: протестить
+
     authorDB.find({}, (err, items)=> {
         let pietetId = items.length,
             pietetPass = randomInteger(1000000,9999999);
@@ -155,7 +248,14 @@ router.get('/newuser/:company/:author', (req, res) => {
             pietetId: pietetId,
             pietetPass: pietetPass,
             company: req.params.company,
-            author: req.params.author
+            author: req.params.author,
+            company2: req.body.company,
+            position: req.body.position,
+            email: req.body.email,
+            pass: req.body.pass,
+            email: "",
+            pass: "",
+
         })
         res.json({
             pietetId: pietetId,
@@ -186,10 +286,13 @@ router.get('/info/:version', (req, res) => {
 app.use(router);
 app.listen(require('./config.js').port);
 
-/*let server = require('https').createServer({
-    key: fs.readFileSync(path.resolve(__dirname, 'ssl/server.key')),
-    cert: fs.readFileSync(path.resolve(__dirname, 'ssl/server.crt'))
-}, app);
-server.listen(require('./config.js').port2);*/
+if (config.prod) {
+    let server = require('https').createServer({
+        key: fs.readFileSync(path.resolve(__dirname, 'ssl/server.key')),
+        cert: fs.readFileSync(path.resolve(__dirname, 'ssl/server.crt'))
+    }, app);
+    server.listen(require('./config.js').port2);
+}
+
 
 console.log(`Running at Port ${config.port}`);
