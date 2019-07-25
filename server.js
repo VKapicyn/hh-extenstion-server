@@ -293,9 +293,9 @@ router.get('/info/:version', (req, res) => {
 router.get('/user/:id', async (req, res) => {
     let results = [];
     userDB.find({}, (err, users) => {
-        for (let i=0; i<users.lengh; i++) {
-            for (let j=0; j<users[i].estimating.lengh; j++) {
-                if (users[i].estimating[j].pietetId === req.params.id) {
+        for (let i=0; i<users.length; i++) {
+            for (let j=0; j<users[i].estimating.length; j++) {
+                if (users[i].estimating[j].id === req.params.id) {
                     results.push({
                         date: users[i].estimating[j].date.toLocaleString("ru-RU", {day: 'numeric', month: 'numeric', year:'numeric'}),
                         cause: (() => {
@@ -308,12 +308,12 @@ router.get('/user/:id', async (req, res) => {
                             return answer;
                         })(),
                         text: (users[i].estimating[j].comment === '') ? 'Без комментариев' : users[i].estimating[j].comment,
-                        id: users[i].estimating[j].id,
+                        id: users[i].userId,
                     });
                 }
             }
-            res.render('users.html', {resumeId: req.params.id, api: config.url ,results:[]})
         }
+        res.render('users.html', {resumeId: req.params.id, api: config.url ,comments: results})
     });
 })
 

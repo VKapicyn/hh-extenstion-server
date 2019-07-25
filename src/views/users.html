@@ -21,7 +21,7 @@
                 <h2>Отзывы которые оставил пользователь о других резюме: id {{resumeId}}</h2>
                 {% if comments.length != 0 %}
                     {% for item in comments %}
-                        <p><b>{{item.cause}}</b> ({{item.date}}) - "{{item.text}}", от пользователя <a target="_blank" href="{{api}}/user/{{item.id}}">id{{item.id}}</a></p>
+                        <p><b>{{item.cause}}</b> ({{item.date}}) - "{{item.text}}", пользователю <a target="_blank" href="{{api}}/сomm/{{item.id}}">id{{item.id}}</a></p>
                     {% endfor %}
                 {% else %}
                     <p><b>Отзывы отсутствуют</b></p>
