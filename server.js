@@ -107,7 +107,7 @@ router.post('/dopreg', async (req, res) => {
                                 email: req.body.email,
                                 pass: req.body.pass,
                             }, {})
-                        }
+                        } else
                         {
                             console.log('vo')
                             console.log(_author)
